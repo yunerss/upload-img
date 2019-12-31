@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+	</head>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<script src="js/ajax.js"></script>
+	<style>
+		input{
+			padding: 5px;
+			background-color:seashell;
+		}
+		td{
+			
+		}
+	</style>
+	<body>
+		<div id='upload'>
+			<form id="from" method="POST" enctype="multipart/form-data" action="http://192.168.103.13:8866/home/PostFromUploadImg">
+				<input type="button" value="s" v-on:click="btn" />
+				<select id="type">
+					<option value="0">允许多个</option>
+					<option value="1">不允许</option>
+				</select>
+				<br>
+				<br>
+				<br>
+				<input type="file" name="files" @change='imgCh' accept="image/jpg,image/jpeg,image/png" />
+				{{imglist.length}}
+				<div v-for="item in imglist">
+					<tr>
+						<td>
+							<img :src="item" style="width: 400px;height: 200px;" />
+						</td>
+						<td>
+							<input type="submit" value="上传start(from)"  />
+						</td>
+						<td>
+							<input type="button" value="上传start(ajax)"  />
+						</td>
+						<td>
+							<input type="button" value="删除" v-on:click="deleteImg" />
+						</td>
+					</tr>
+				</div>
+			</form>
+			
+		</div>
+	</body>
+	<script>
+		var Vue = new Vue({
+			el: '#upload',
+			data: { //需要的数据
+				msg: '123',
+				imgmsg: '',
+				imgSrc: '', //存放的预览图片信息
+				imgdata: {},
+				imglist:[],
+			},
+			methods: { //方法
+				btn() {
+					ajax({
+						url: 'http://192.168.103.13:8866/home/PostTest',
+						type: 'post',
+						data: {},
+						success: function(res) {
+							alert(res.msg);
+						}
+					});
+				},
+				imgCh(e) //图片预览
+				{
+					var $this = this;
+					$this.imgdata=e.target.files[0];
+					var file = e.target.files[0]; //获取文件信息
+					if (window.FileReader) {
+						var reader = new FileReader();
+						reader.readAsDataURL(file);
+						//监听文件读取结束后事件    
+						reader.onloadend = function(e) {
+							console.log($this.imgSrc);
+							$this.imgSrc = e.target.result;
+						};
+					}
+				},
+				uploadImg() { //上传
+					//console.log(this.imgdata);
+					// ajax({
+					// 	url: 'http://192.168.103.13:8866/home/PostUploadImg',
+					// 	type: 'post',
+					// 	dataType:'json',
+					// 	data: {
+					// 		'files':this.imgdata
+					// 	},
+					// 	success: function(res) {
+					// 		console.log(res);
+					// 	}
+					// });
+					
+				},
+				deleteImg() { //删除
+
+				},
+				SetAlldata()//获取所有图片
+				{
+					var $this = this;
+					ajax({//首次加载的时候把  (yun)文件夹里边的查找出来
+						url:"http://192.168.103.13:8866/home/PostAllData",
+						type:'post',
+						dataType:'jsonp',
+						data:{'path':'yun'},
+						success:function(res)
+						{
+							
+							$this.imglist=res.list;
+							console.log($this.imglist);
+						}
+					});
+				}
+			},
+			mounted()
+			{
+				this.SetAlldata();
+			}
+			
+		});
+	</script>
+</html>
